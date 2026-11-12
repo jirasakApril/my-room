@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Room Designer Pro</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- FontAwesome สำหรับไอคอน -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Three.js และ OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- แถบเมนูด้านบน -->
+        <header class="top-bar">
+            <div class="logo">
+                <i class="fa-solid id-card-clip fa-cube"></i> <span>Room Designer Pro</span>
+            </div>
+            <div class="project-actions">
+                <button id="btn-save-json" class="btn"><i class="fa-solid fa-file-arrow-down"></i> บันทึก JSON</button>
+                <label for="input-load-json" class="btn"><i class="fa-solid fa-file-arrow-up"></i> โหลด JSON</label>
+                <input type="file" id="input-load-json" accept=".json" style="display: none;">
+                <button id="btn-export-png" class="btn btn-primary"><i class="fa-solid fa-camera"></i> ส่งออก PNG</button>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- แถบเครื่องมือด้านซ้าย (หมวดหมู่ & เฟอร์นิเจอร์) -->
+            <aside class="left-sidebar">
+                <div class="sidebar-tabs">
+                    <button class="tab-btn active" data-target="tab-room"><i class="fa-solid fa-house"></i> ห้อง</button>
+                    <button class="tab-btn" data-target="tab-furniture"><i class="fa-solid id-card-clip fa-couch"></i> เฟอร์นิเจอร์</button>
+                </div>
+
+                <!-- ตั้งค่าห้อง -->
+                <div class="tab-content active" id="tab-room">
+                    <h3><i class="fa-solid fa-ruler-combined"></i> ขนาดห้อง (เมตร)</h3>
+                    <div class="control-group">
+                        <label>ความกว้าง (X): <span id="val-room-w">5</span>m</label>
+                        <input type="range" id="room-width" min="3" max="15" step="0.5" value="5">
+                    </div>
+                    <div class="control-group">
+                        <label>ความยาว (Z): <span id="val-room-l">5</span>m</label>
+                        <input type="range" id="room-length" min="3" max="15" step="0.5" value="5">
+                    </div>
+                    <div class="control-group">
+                        <label>ความสูง (Y): <span id="val-room-h">3</span>m</label>
+                        <input type="range" id="room-height" min="2.5" max="6" step="0.5" value="3">
+                    </div>
+
+                    <h3><i class="fa-solid fa-palette"></i> วัสดุและสี</h3>
+                    <div class="control-group">
+                        <label>สีผนังห้อง</label>
+                        <input type="color" id="room-wall-color" value="#eef2f5">
+                    </div>
+                    <div class="control-group">
+                        <label>สีพื้นห้อง</label>
+                        <input type="color" id="room-floor-color" value="#8b5a2b">
+                    </div>
+                </div>
+
+                <!-- รายการเฟอร์นิเจอร์ -->
+                <div class="tab-content" id="tab-furniture">
+                    <h3>ลากหรือคลิกเพื่อเพิ่มวัตถุ</h3>
+                    <div class="furniture-grid">
+                        <div class="furniture-item" data-type="bed" draggable="true">
+                            <i class="fa-solid fa-bed"></i>
+                            <span>เตียงนอน</span>
+                        </div>
+                        <div class="furniture-item" data-type="desk" draggable="true">
+                            <i class="fa-solid fa-desktop"></i>
+                            <span>โต๊ะทำงาน</span>
+                        </div>
+                        <div class="furniture-item" data-type="chair" draggable="true">
+                            <i class="fa-solid fa-chair"></i>
+                            <span>เก้าอี้</span>
+                        </div>
+                        <div class="furniture-item" data-type="sofa" draggable="true">
+                            <i class="fa-solid fa-couch"></i>
+                            <span>โซฟา</span>
+                        </div>
+                        <div class="furniture-item" data-type="wardrobe" draggable="true">
+                            <i class="fa-solid fa-door-closed"></i>
+                            <span>ตู้เสื้อผ้า</span>
+                        </div>
+                        <div class="furniture-item" data-type="tv" draggable="true">
+                            <i class="fa-solid fa-tv"></i>
+                            <span>โทรทัศน์</span>
+                        </div>
+                        <div class="furniture-item" data-type="shelf" draggable="true">
+                            <i class="fa-solid fa-shelves"></i>
+                            <span>ชั้นวางของ</span>
+                        </div>
+                        <div class="furniture-item" data-type="lamp" draggable="true">
+                            <i class="fa-solid fa-lamp"></i>
+                            <span>โคมไฟ</span>
+                        </div>
+                        <div class="furniture-item" data-type="rug" draggable="true">
+                            <i class="fa-solid fa-square"></i>
+                            <span>พรม</span>
+                        </div>
+                        <div class="furniture-item" data-type="plant" draggable="true">
+                            <i class="fa-solid fa-seedling"></i>
+                            <span>ต้นไม้ตกแต่ง</span>
+                        </div>
+                        <div class="furniture-item" data-type="door" draggable="true">
+                            <i class="fa-solid fa-door-open"></i>
+                            <span>ประตู</span>
+                        </div>
+                        <div class="furniture-item" data-type="window" draggable="true">
+                            <i class="fa-solid fa-window-maximize"></i>
+                            <span>หน้าต่าง</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- พื้นที่แสดงผล 3D ตรงกลาง -->
+            <main class="viewport-container" id="canvas-container">
+                <!-- แถบควบคุมมุมมองกล้องลอย -->
+                <div class="camera-toolbar">
+                    <button id="cam-top" title="มุมมองด้านบน"><i class="fa-solid fa-arrow-down-up-lock"></i> ด้านบน</button>
+                    <button id="cam-front" title="มุมมองด้านหน้า"><i class="fa-solid fa-eye"></i> ด้านหน้า</button>
+                    <button id="cam-3d" class="active" title="มุมมอง 3D อิสระ"><i class="fa-solid fa-cube"></i> 3D</button>
+                    <button id="cam-walk" title="ระบบเดินชมห้อง"><i class="fa-solid fa-person-walking"></i> โหมดเดิน</button>
+                </div>
+            </main>
+
+            <!-- แถบคุณสมบัติวัตถุด้านขวา -->
+            <aside class="right-sidebar">
+                <h3><i class="fa-solid id-card-clip fa-sliders"></i> คุณสมบัติวัตถุ</h3>
+                <div id="no-selection" class="info-msg">ยังไม่ได้เลือกวัตถุ<br><small>คลิกที่วัตถุในห้องเพื่อแก้ไข</small></div>
+                
+                <div id="selection-properties" style="display: none;">
+                    <div class="control-group">
+                        <label>ชื่อวัตถุ: <span id="prop-name">-</span></label>
+                    </div>
+                    <div class="control-group">
+                        <label>ตำแหน่ง X: <input type="number" id="prop-pos-x" step="0.1"></label>
+                        <label>ตำแหน่ง Z: <input type="number" id="prop-pos-z" step="0.1"></label>
+                    </div>
+                    <div class="control-group">
+                        <label>ขนาด กว้าง (W): <input type="number" id="prop-size-w" step="0.1" min="0.2"></label>
+                        <label>ขนาด สูง (H): <input type="number" id="prop-size-h" step="0.1" min="0.2"></label>
+                        <label>ขนาด ลึก (D): <input type="number" id="prop-size-d" step="0.1" min="0.2"></label>
+                    </div>
+                    <div class="control-group">
+                        <label>หมุน (องศา): <input type="range" id="prop-rotation" min="0" max="360" value="0"></label>
+                    </div>
+                    <div class="control-group">
+                        <label>สีวัตถุ: <input type="color" id="prop-color" value="#ffffff"></label>
+                    </div>
+                    <div class="action-buttons">
+                        <button id="btn-duplicate" class="btn"><i class="fa-solid fa-copy"></i> คัดลอก</button>
+                        <button id="btn-delete" class="btn btn-danger"><i class="fa-solid fa-trash"></i> ลบวัตถุ</button>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
